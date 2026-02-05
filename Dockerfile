@@ -16,14 +16,21 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY . .
+COPY app.py .
+COPY models.py .
+COPY templates ./templates
+COPY static ./static
 
-# Expose port (Cloud Run will set PORT env variable)
+# Create directory for SQLite database
+RUN mkdir -p /app/instance
+
+# Expose port
 EXPOSE 8080
 
-# Set environment variable for Flask
+# Set environment variables
 ENV FLASK_APP=app.py
 ENV PORT=8080
+ENV PYTHONUNBUFFERED=1
 
 # Run with gunicorn
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120 app:app
