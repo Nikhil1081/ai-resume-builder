@@ -35,7 +35,7 @@ Many students struggle to present their skills and projects in an attractive, pr
 - **Vanilla JavaScript** (ES6+)
 
 ### Deployment
-- **Railway** - Cloud platform
+- **Google Cloud Run / Firebase** - Cloud platform (FREE tier)
 - **GitHub** - Version control
 
 ## 📋 Prerequisites
@@ -98,43 +98,50 @@ gunicorn app:app
 
 Visit `http://localhost:5000` in your browser.
 
-## 🌐 Deployment on Railway
+## 🌐 Deployment on Google Cloud Run (Firebase)
 
-### Quick Deploy
+### Quick Deploy - Windows
 
-1. **Fork this repository** to your GitHub account
+1. **Install Google Cloud CLI**: Download from [cloud.google.com/sdk](https://cloud.google.com/sdk/docs/install)
 
-2. **Sign up on Railway**: [railway.app](https://railway.app)
+2. **Login and Setup**:
+```powershell
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
 
-3. **Create New Project**:
-   - Click "New Project"
-   - Select "Deploy from GitHub repo"
-   - Choose your forked repository
+3. **Deploy with one command**:
+```powershell
+.\deploy-firebase.bat
+```
 
-4. **Add Environment Variables**:
-   - Go to your project settings
-   - Add `XAI_API_KEY` with your xAI Grok API key (FREE from [console.x.ai](https://console.x.ai/))
-
-5. **Deploy**: Railway will automatically deploy your app!
+Enter your Grok API key when prompted, and you're done!
 
 ### Manual Deployment Steps
 
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
+```powershell
+# Login to Google Cloud
+gcloud auth login
 
-# Login to Railway
-railway login
+# Set your project (create one at console.cloud.google.com)
+gcloud config set project YOUR_PROJECT_ID
 
-# Link to project
-railway link
+# Enable required APIs
+gcloud services enable run.googleapis.com
+gcloud services enable containerregistry.googleapis.com
 
-# Add environment variables
-railway variables set XAI_API_KEY=your_key_here
-
-# Deploy
-railway up
+# Deploy to Cloud Run
+gcloud run deploy ai-resume-builder `
+  --source . `
+  --platform managed `
+  --region us-central1 `
+  --allow-unauthenticated `
+  --set-env-vars "XAI_API_KEY=your_key_here"
 ```
+
+Your app will be live at: `https://ai-resume-builder-xxxxx-uc.a.run.app`
+
+📖 **Detailed instructions**: See [FIREBASE_DEPLOYMENT.md](FIREBASE_DEPLOYMENT.md)
 
 ## 📱 Usage Guide
 
@@ -172,12 +179,13 @@ railway up
 ai-resume-builder/
 ├── app.py                  # Flask application
 ├── requirements.txt        # Python dependencies
-├── Procfile               # Railway/Heroku config
-├── railway.toml           # Railway configuration
+├── Dockerfile             # Container configuration
+├── firebase.json          # Firebase configuration
 ├── runtime.txt            # Python version
 ├── .env.example           # Environment variables template
 ├── .gitignore            # Git ignore rules
 ├── README.md             # This file
+├── FIREBASE_DEPLOYMENT.md # Deployment guide
 ├── templates/
 │   └── index.html        # Main HTML template
 ├── static/
@@ -193,7 +201,7 @@ ai-resume-builder/
 2. Sign up or login
 3. Click **"Create API Key"**
 4. Copy the key (starts with `xai-...`)
-5. Add it to Railway variables or your `.env` file
+5. Add it to your `.env` file or Cloud Run environment variables
 
 **Why Grok?** 
 ✅ Completely FREE
@@ -286,9 +294,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- OpenAI for GPT API
+- xAI for free Grok API
 - Flask community
-- Railway for hosting
+- Google Cloud for hosting
 - IBM for project inspiration
 
 ---
