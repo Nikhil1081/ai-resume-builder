@@ -1,19 +1,40 @@
 {
   "hosting": {
-    "public": "static",
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/.venv/**"
     ],
     "rewrites": [
       {
+        "source": "/api/**",
+        "function": "app"
+      },
+      {
         "source": "**",
-        "run": {
-          "serviceId": "ai-resume-builder",
-          "region": "us-central1"
-        }
+        "destination": "/index.html"
       }
     ]
+  },
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "default",
+      "runtime": "python311"
+    }
+  ],
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
   }
 }
