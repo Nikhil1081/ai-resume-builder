@@ -5,9 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Resume & Portfolio Builder</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .user-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .user-name {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .btn-logout {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+        }
+        .header {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
+        <!-- User Menu -->
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ user.username[0].upper() if user and user.username else 'U' }}
+                </div>
+                <span class="user-name">
+                    {{ user.username if user and user.username else 'User' }}
+                </span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+
         <!-- Header -->
         <header class="header">
             <h1>🎓 AI Resume & Portfolio Builder</h1>
