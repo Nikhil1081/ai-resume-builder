@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume & Portfolio Builder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎓 AI Resume & Portfolio Builder</h1>
+            <p class="subtitle">Create professional resumes, cover letters, and portfolios with AI</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('resume')">Resume Builder</button>
+            <button class="tab-button" onclick="showTab('cover-letter')">Cover Letter</button>
+            <button class="tab-button" onclick="showTab('portfolio')">Portfolio</button>
+        </div>
+
+        <!-- Resume Builder Tab -->
+        <div id="resume-tab" class="tab-content active">
+            <div class="form-section">
+                <h2>📝 Personal Information</h2>
+                <form id="resume-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone *</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="+1 234 567 8900">
+                        </div>
+                        <div class="form-group">
+                            <label for="target-role">Target Role *</label>
+                            <input type="text" id="target-role" name="targetRole" required placeholder="Software Engineer">
+                        </div>
+                    </div>
+
+                    <h2>💼 Professional Details</h2>
+                    <div class="form-group">
+                        <label for="skills">Skills (comma-separated) *</label>
+                        <textarea id="skills" name="skills" rows="3" required placeholder="Python, JavaScript, React, Machine Learning, Data Analysis"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="education">Education *</label>
+                        <textarea id="education" name="education" rows="4" required placeholder="Bachelor of Technology in Computer Science&#10;XYZ University, 2024&#10;GPA: 3.8/4.0"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Experience</label>
+                        <textarea id="experience" name="experience" rows="5" placeholder="Software Engineering Intern at ABC Corp&#10;June 2023 - August 2023&#10;- Developed web applications using React and Node.js&#10;- Collaborated with team of 5 developers"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projects">Projects *</label>
+                        <textarea id="projects" name="projects" rows="5" required placeholder="1. E-commerce Platform - Built full-stack web app with payment integration&#10;2. ML Image Classifier - Created CNN model with 95% accuracy&#10;3. Task Management App - React-based productivity tool"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="generate-btn">
+                        ✨ Generate AI Resume
+                    </button>
+                </form>
+            </div>
+
+            <!-- Resume Preview -->
+            <div id="resume-preview" class="preview-section" style="display: none;">
+                <div class="preview-header">
+                    <h2>📄 Your AI-Generated Resume</h2>
+                    <button class="btn btn-secondary" onclick="downloadPDF()">📥 Download PDF</button>
+                </div>
+                <div id="resume-content" class="resume-display"></div>
+            </div>
+        </div>
+
+        <!-- Cover Letter Tab -->
+        <div id="cover-letter-tab" class="tab-content">
+            <div class="form-section">
+                <h2>✉️ Cover Letter Generator</h2>
+                <form id="cover-letter-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cl-name">Full Name *</label>
+                            <input type="text" id="cl-name" name="name" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="cl-role">Target Role *</label>
+                            <input type="text" id="cl-role" name="targetRole" required placeholder="Software Engineer">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company Name *</label>
+                        <input type="text" id="company" name="company" required placeholder="Google">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cl-skills">Your Skills *</label>
+                        <textarea id="cl-skills" name="skills" rows="3" required placeholder="Python, Machine Learning, JavaScript"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cl-experience">Brief Experience *</label>
+                        <textarea id="cl-experience" name="experience" rows="4" required placeholder="Describe your relevant experience, internships, or projects"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">✨ Generate Cover Letter</button>
+                </form>
+            </div>
+
+            <div id="cover-letter-preview" class="preview-section" style="display: none;">
+                <div class="preview-header">
+                    <h2>✉️ Your Cover Letter</h2>
+                    <button class="btn btn-secondary" onclick="copyCoverLetter()">📋 Copy to Clipboard</button>
+                </div>
+                <div id="cover-letter-content" class="cover-letter-display"></div>
+            </div>
+        </div>
+
+        <!-- Portfolio Tab -->
+        <div id="portfolio-tab" class="tab-content">
+            <div class="form-section">
+                <h2>🎨 Portfolio Generator</h2>
+                <p class="info-text">Create a beautiful online portfolio to showcase your projects and skills.</p>
+                
+                <div class="form-group">
+                    <label for="portfolio-name">Your Name *</label>
+                    <input type="text" id="portfolio-name" placeholder="John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolio-bio">Professional Bio *</label>
+                    <textarea id="portfolio-bio" rows="4" placeholder="I'm a passionate developer with experience in..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolio-skills">Skills *</label>
+                    <input type="text" id="portfolio-skills" placeholder="Python, React, Machine Learning">
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolio-projects">Projects (JSON format) *</label>
+                    <textarea id="portfolio-projects" rows="8" placeholder='[
+  {
+    "title": "Project Name",
+    "description": "Brief description",
+    "image": "https://via.placeholder.com/400x300",
+    "link": "https://github.com/yourusername/project",
+    "tech": ["Python", "Flask"]
+  }
+]'></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="generatePortfolio()">✨ Generate Portfolio Page</button>
+            </div>
+
+            <div id="portfolio-preview" class="preview-section" style="display: none;">
+                <div class="preview-header">
+                    <h2>🎨 Your Portfolio</h2>
+                    <button class="btn btn-secondary" onclick="downloadPortfolio()">📥 Download HTML</button>
+                </div>
+                <iframe id="portfolio-frame" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></iframe>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Generating with AI... Please wait</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
