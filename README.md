@@ -1,10 +1,10 @@
 # 🎓 AI Resume & Portfolio Builder
 
-An intelligent web application that helps students create professional resumes, cover letters, and portfolios using AI technology. Built with Python Flask and powered by OpenAI's GPT models.
+An intelligent web application that helps students create professional resumes, cover letters, and portfolios using AI technology. Built with Python Flask and powered by **xAI's Grok** (FREE API).
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Flask](https://img.shields.io/badge/Flask-3.0-green)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5-orange)
+![Grok](https://img.shields.io/badge/xAI-Grok--Beta-purple)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## 🌟 Features
@@ -25,7 +25,7 @@ Many students struggle to present their skills and projects in an attractive, pr
 ### Backend
 - **Python 3.11**
 - **Flask 3.0** - Web framework
-- **OpenAI API** - AI-powered content generation
+- **xAI Grok API** - FREE AI-powered content generation
 - **ReportLab** - PDF generation
 - **Gunicorn** - Production WSGI server
 
@@ -41,7 +41,7 @@ Many students struggle to present their skills and projects in an attractive, pr
 ## 📋 Prerequisites
 
 - Python 3.11+
-- OpenAI API key ([Get one here](https://platform.openai.com/api-keys))
+- xAI Grok API key (FREE! [Get one here](https://console.x.ai/))
 - Git
 
 ## 🛠️ Installation & Setup
@@ -76,9 +76,15 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+XAI_API_KEY=your_xai_api_key_here
 PORT=5000
 ```
+
+**Get your FREE Grok API key:**
+1. Visit [https://console.x.ai/](https://console.x.ai/)
+2. Sign up with your account
+3. Create a new API key
+4. Copy and paste it above
 
 ### 5. Run the Application
 
@@ -107,7 +113,7 @@ Visit `http://localhost:5000` in your browser.
 
 4. **Add Environment Variables**:
    - Go to your project settings
-   - Add `OPENAI_API_KEY` with your OpenAI API key
+   - Add `XAI_API_KEY` with your xAI Grok API key (FREE from [console.x.ai](https://console.x.ai/))
 
 5. **Deploy**: Railway will automatically deploy your app!
 
@@ -124,7 +130,7 @@ railway login
 railway link
 
 # Add environment variables
-railway variables set OPENAI_API_KEY=your_key_here
+railway variables set XAI_API_KEY=your_key_here
 
 # Deploy
 railway up
@@ -181,7 +187,19 @@ ai-resume-builder/
 │       └── app.js        # Frontend JavaScript
 ```
 
-## 🔑 API Endpoints
+## 🔑 Getting Your FREE Grok API Key
+
+1. Go to: https://console.x.ai/
+2. Sign up or login
+3. Click **"Create API Key"**
+4. Copy the key (starts with `xai-...`)
+5. Add it to Railway variables or your `.env` file
+
+**Why Grok?** 
+✅ Completely FREE
+✅ No credit card required
+✅ Powerful AI capabilities
+✅ Perfect for students!
 
 ### POST `/api/generate-resume`
 Generates an AI-powered resume

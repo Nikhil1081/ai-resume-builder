@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify, send_file
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
-import openai
+import requests
+import json
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -16,8 +17,9 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Configure OpenAI API
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Configure Grok API (xAI)
+GROK_API_KEY = os.getenv('XAI_API_KEY', 'xai-demo-key')
+GROK_API_URL = 'https://api.x.ai/v1/chat/completions'
 
 @app.route('/')
 def index():
@@ -68,23 +70,33 @@ Return the resume in the following JSON format:
     ]
 }}"""
 
-        # Call OpenAI API
-        if openai.api_key:
-            response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
+        # Call Grok API (xAI)
+        if GROK_API_KEY and GROK_API_KEY != 'xai-demo-key':
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {GROK_API_KEY}'
+            }
+            
+            payload = {
+                'model': 'grok-beta',
+                'messages': [
                     {"role": "system", "content": "You are an expert resume writer and career counselor. Create professional, tailored resumes that highlight individual strengths."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.7,
-                max_tokens=1500
-            )
+                'temperature': 0.7,
+                'max_tokens': 1500
+            }
             
-            ai_content = response.choices[0].message.content
-            # Extract JSON from response
-            start_idx = ai_content.find('{')
-            end_idx = ai_content.rfind('}') + 1
-            resume_data = json.loads(ai_content[start_idx:end_idx])
+            response = requests.post(GROK_API_URL, headers=headers, json=payload)
+            
+            if response.status_code == 200:
+                ai_content = response.json()['choices'][0]['message']['content']
+                # Extract JSON from response
+                start_idx = ai_content.find('{')
+                end_idx = ai_content.rfind('}') + 1
+                resume_data = json.loads(ai_content[start_idx:end_idx])
+            else:
+                raise Exception(f"Grok API error: {response.text}")
         else:
             # Fallback if no API key
             resume_data = {
@@ -129,18 +141,28 @@ Experience: {experience}
 
 Create a personalized cover letter that showcases enthusiasm, relevant skills, and fit for the role. Keep it concise (3-4 paragraphs) and professional."""
 
-        if openai.api_key:
-            response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
+        if GROK_API_KEY and GROK_API_KEY != 'xai-demo-key':
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {GROK_API_KEY}'
+            }
+            
+            payload = {
+                'model': 'grok-beta',
+                'messages': [
                     {"role": "system", "content": "You are an expert career counselor who writes compelling cover letters."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.7,
-                max_tokens=800
-            )
+                'temperature': 0.7,
+                'max_tokens': 800
+            }
             
-            cover_letter = response.choices[0].message.content
+            response = requests.post(GROK_API_URL, headers=headers, json=payload)
+            
+            if response.status_code == 200:
+                cover_letter = response.json()['choices'][0]['message']['content']
+            else:
+                raise Exception(f"Grok API error: {response.text}")
         else:
             cover_letter = f"""Dear Hiring Manager,
 
