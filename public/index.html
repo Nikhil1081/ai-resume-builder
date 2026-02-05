@@ -5,9 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Resume & Portfolio Builder</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .user-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .user-name {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .btn-auth-link {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-auth-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        .btn-logout {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+        }
+        .header {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
+        <!-- User Menu -->
+        <div class="user-menu" id="userMenu">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
         <!-- Header -->
         <header class="header">
             <h1>🎓 AI Resume & Portfolio Builder</h1>
@@ -180,5 +257,34 @@
     </div>
 
     <script src="/js/app.js"></script>
+    <script>
+        // Check if user is logged in (demo mode using localStorage)
+        window.addEventListener('DOMContentLoaded', function() {
+            const userMenu = document.getElementById('userMenu');
+            const demoUser = localStorage.getItem('demo_user');
+            
+            if (demoUser) {
+                // User is logged in
+                userMenu.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${demoUser.charAt(0).toUpperCase()}</div>
+                        <span class="user-name">${demoUser}</span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                `;
+            } else {
+                // User is not logged in
+                userMenu.innerHTML = `
+                    <a href="/login.html" class="btn-auth-link">Login</a>
+                    <a href="/register.html" class="btn-auth-link">Register</a>
+                `;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('demo_user');
+            window.location.reload();
+        }
+    </script>
 </body>
 </html>
