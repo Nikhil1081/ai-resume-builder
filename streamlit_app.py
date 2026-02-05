@@ -8,8 +8,9 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
+import hashlib
 
 load_dotenv()
 
@@ -63,6 +64,37 @@ if 'users' not in st.session_state:
     st.session_state.users = {}
 if 'resume_data' not in st.session_state:
     st.session_state.resume_data = None
+
+# Persistent storage functions
+USERS_FILE = 'users_data.json'
+
+def hash_password(password):
+    """Hash password for security"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def load_users():
+    """Load users from JSON file"""
+    try:
+        if os.path.exists(USERS_FILE):
+            with open(USERS_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        st.error(f"Error loading users: {str(e)}")
+    return {}
+
+def save_users(users):
+    """Save users to JSON file"""
+    try:
+        with open(USERS_FILE, 'w') as f:
+            json.dump(users, f, indent=4)
+        return True
+    except Exception as e:
+        st.error(f"Error saving users: {str(e)}")
+        return False
+
+# Load existing users on startup
+if not st.session_state.users:
+    st.session_state.users = load_users()
 
 # Configure API
 GROK_API_KEY = os.getenv('XAI_API_KEY', st.secrets.get('XAI_API_KEY', ''))
@@ -136,70 +168,196 @@ Return the resume in the following JSON format:
     }
 
 def generate_pdf(resume_data, personal_info):
-    """Generate PDF from resume data"""
+    """Generate enhanced professional PDF from resume data"""
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72,
-                           topMargin=72, bottomMargin=18)
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=letter, 
+        rightMargin=50, 
+        leftMargin=50,
+        topMargin=50, 
+        bottomMargin=40
+    )
     
     elements = []
     styles = getSampleStyleSheet()
     
+    # Enhanced styles with modern colors and fonts
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#2c3e50'),
-        spaceAfter=6,
-        alignment=1
+        fontSize=28,
+        textColor=colors.HexColor('#1a237e'),  # Deep blue
+        spaceAfter=4,
+        alignment=1,
+        fontName='Helvetica-Bold',
+        leading=32
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.HexColor('#424242'),  # Dark gray
+        spaceAfter=16,
+        alignment=1,
+        fontName='Helvetica'
     )
     
     heading_style = ParagraphStyle(
         'CustomHeading',
         parent=styles['Heading2'],
         fontSize=14,
-        textColor=colors.HexColor('#3498db'),
-        spaceAfter=12,
-        spaceBefore=12
+        textColor=colors.HexColor('#1976d2'),  # Blue
+        spaceAfter=8,
+        spaceBefore=16,
+        fontName='Helvetica-Bold',
+        borderWidth=0,
+        borderPadding=0,
+        leftIndent=0,
+        borderColor=colors.HexColor('#1976d2'),
+        borderRadius=None
     )
     
-    elements.append(Paragraph(personal_info.get('name', 'N/A'), title_style))
-    contact = f"{personal_info.get('email', '')} | {personal_info.get('phone', '')}"
-    elements.append(Paragraph(contact, styles['Normal']))
-    elements.append(Spacer(1, 0.2*inch))
+    content_style = ParagraphStyle(
+        'CustomContent',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.HexColor('#212121'),
+        spaceAfter=6,
+        leading=14,
+        fontName='Helvetica'
+    )
     
+    bold_content_style = ParagraphStyle(
+        'BoldContent',
+        parent=content_style,
+        fontName='Helvetica-Bold',
+        fontSize=11,
+        textColor=colors.HexColor('#424242')
+    )
+    
+    # Header Section with blue background bar
+    header_data = [[Paragraph(personal_info.get('name', 'N/A').upper(), title_style)]]
+    header_table = Table(header_data, colWidths=[500])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#e3f2fd')),  # Light blue background
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 20),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    elements.append(header_table)
+    
+    # Contact Information
+    contact = f"📧 {personal_info.get('email', '')}  |  📱 {personal_info.get('phone', '')}"
+    elements.append(Paragraph(contact, subtitle_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Professional Summary with accent
     if resume_data.get('summary'):
-        elements.append(Paragraph("PROFESSIONAL SUMMARY", heading_style))
-        elements.append(Paragraph(resume_data['summary'], styles['Normal']))
-        elements.append(Spacer(1, 0.15*inch))
+        section_header = Paragraph("═══ PROFESSIONAL SUMMARY ═══", heading_style)
+        elements.append(section_header)
+        
+        summary_data = [[Paragraph(resume_data['summary'], content_style)]]
+        summary_table = Table(summary_data, colWidths=[500])
+        summary_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f5f5f5')),
+            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#1976d2')),
+            ('LEFTPADDING', (0, 0), (-1, -1), 12),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(summary_table)
+        elements.append(Spacer(1, 0.2*inch))
     
+    # Skills Section with visual styling
     if resume_data.get('skills'):
-        elements.append(Paragraph("SKILLS", heading_style))
-        skills_text = " • ".join(resume_data['skills'][:10])
-        elements.append(Paragraph(skills_text, styles['Normal']))
-        elements.append(Spacer(1, 0.15*inch))
+        elements.append(Paragraph("═══ TECHNICAL SKILLS ═══", heading_style))
+        
+        skills_list = resume_data['skills'][:12]  # Top 12 skills
+        if skills_list:
+            # Create skill badges effect
+            skills_rows = []
+            row = []
+            for i, skill in enumerate(skills_list):
+                row.append(Paragraph(f"▪ {skill}", content_style))
+                if (i + 1) % 3 == 0:
+                    skills_rows.append(row)
+                    row = []
+            if row:
+                skills_rows.append(row)
+            
+            skills_table = Table(skills_rows, colWidths=[166, 166, 166])
+            skills_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            elements.append(skills_table)
+        elements.append(Spacer(1, 0.2*inch))
     
+    # Experience Section
     if resume_data.get('experience'):
-        elements.append(Paragraph("EXPERIENCE", heading_style))
+        elements.append(Paragraph("═══ PROFESSIONAL EXPERIENCE ═══", heading_style))
         for exp in resume_data['experience'][:3]:
-            exp_title = f"<b>{exp.get('title', '')}</b> - {exp.get('company', '')}"
-            elements.append(Paragraph(exp_title, styles['Normal']))
-            elements.append(Paragraph(exp.get('description', ''), styles['Normal']))
-            elements.append(Spacer(1, 0.1*inch))
+            exp_title = f"<b>{exp.get('title', '')}</b> | {exp.get('company', '')}"
+            elements.append(Paragraph(exp_title, bold_content_style))
+            
+            if exp.get('duration'):
+                elements.append(Paragraph(f"<i>{exp.get('duration', '')}</i>", content_style))
+            
+            elements.append(Paragraph(exp.get('description', ''), content_style))
+            elements.append(Spacer(1, 0.12*inch))
+        elements.append(Spacer(1, 0.1*inch))
     
+    # Education Section
     if resume_data.get('education'):
-        elements.append(Paragraph("EDUCATION", heading_style))
+        elements.append(Paragraph("═══ EDUCATION ═══", heading_style))
         for edu in resume_data['education'][:2]:
-            edu_text = f"<b>{edu.get('degree', '')}</b> - {edu.get('institution', '')}"
-            elements.append(Paragraph(edu_text, styles['Normal']))
-            elements.append(Spacer(1, 0.1*inch))
+            edu_title = f"<b>{edu.get('degree', '')}</b>"
+            elements.append(Paragraph(edu_title, bold_content_style))
+            
+            edu_info = f"{edu.get('institution', '')} | {edu.get('year', '')}"
+            elements.append(Paragraph(edu_info, content_style))
+            
+            if edu.get('details'):
+                elements.append(Paragraph(edu.get('details', ''), content_style))
+            
+            elements.append(Spacer(1, 0.12*inch))
+        elements.append(Spacer(1, 0.1*inch))
     
+    # Projects Section
     if resume_data.get('projects'):
-        elements.append(Paragraph("PROJECTS", heading_style))
+        elements.append(Paragraph("═══ KEY PROJECTS ═══", heading_style))
         for proj in resume_data['projects'][:3]:
             proj_title = f"<b>{proj.get('name', '')}</b>"
-            elements.append(Paragraph(proj_title, styles['Normal']))
-            elements.append(Paragraph(proj.get('description', ''), styles['Normal']))
-            elements.append(Spacer(1, 0.1*inch))
+            elements.append(Paragraph(proj_title, bold_content_style))
+            
+            elements.append(Paragraph(proj.get('description', ''), content_style))
+            
+            if proj.get('technologies'):
+                tech_text = f"<i>Technologies: {proj.get('technologies', '')}</i>"
+                elements.append(Paragraph(tech_text, content_style))
+            
+            elements.append(Spacer(1, 0.12*inch))
+    
+    # Footer
+    elements.append(Spacer(1, 0.3*inch))
+    footer_text = f"Generated on {datetime.now().strftime('%B %d, %Y')} | AI Resume Builder"
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.HexColor('#757575'),
+        alignment=1
+    )
+    elements.append(Paragraph(footer_text, footer_style))
     
     doc.build(elements)
     buffer.seek(0)
@@ -218,9 +376,12 @@ def login_page():
             submit = st.form_submit_button("Login")
             
             if submit:
-                if username in st.session_state.users and st.session_state.users[username] == password:
+                hashed_pwd = hash_password(password)
+                users = load_users()
+                if username in users and users[username].get('password') == hashed_pwd:
                     st.session_state.logged_in = True
                     st.session_state.username = username
+                    st.session_state.users = users
                     st.success("Login successful!")
                     st.rerun()
                 else:
@@ -247,17 +408,29 @@ def register_page():
             submit = st.form_submit_button("Create Account")
             
             if submit:
+                users = load_users()
                 if not all([full_name, username, email, password, confirm_password]):
                     st.error("Please fill in all fields")
                 elif password != confirm_password:
                     st.error("Passwords don't match")
-                elif username in st.session_state.users:
+                elif len(password) < 6:
+                    st.error("Password must be at least 6 characters")
+                elif username in users:
                     st.error("Username already exists")
                 else:
-                    st.session_state.users[username] = password
-                    st.success("Registration successful! Please login.")
-                    st.session_state.page = 'login'
-                    st.rerun()
+                    users[username] = {
+                        'password': hash_password(password),
+                        'full_name': full_name,
+                        'email': email,
+                        'created_at': datetime.now().isoformat()
+                    }
+                    if save_users(users):
+                        st.session_state.users = users
+                        st.success("Registration successful! Please login.")
+                        st.session_state.page = 'login'
+                        st.rerun()
+                    else:
+                        st.error("Registration failed. Please try again.")
         
         st.markdown("---")
         if st.button("Already have an account? Login here"):
